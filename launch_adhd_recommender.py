@@ -49,9 +49,9 @@ def main():
             sia = SentimentIntensityAnalyzer()
 
             reddit = praw.Reddit(
-                client_id="UJoTpwzPJnh-kRvDGnFtoA",
-                client_secret="jn_m05OJLKIcJsk4VOgRhRTsAgSmdA",
-                user_agent="adhd research script by /u/adhd_scraper"
+                client_id="****** Enter your client_id here *******",
+                client_secret="****** Enter your client_secret here *******",
+                user_agent="****** Enter your user_agent here (optional) *******"
             )
 
             print("🔍 Scraping r/ADHD...")
