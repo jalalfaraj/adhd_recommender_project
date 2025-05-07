@@ -12,12 +12,12 @@ This project is a comprehensive solution for discovering and recommending "thriv
 
 ## ✨ Features
 - **Interactive Streamlit Web App**:
-  - Enter an ADHD challenge and get top 2 most similar thriving stories.
-  - Links directly to Reddit for full reading.
+  - Enter an ADHD challenge that you are facing and get top 2 most similar thriving (people with a similar situation who figured it out) stories.
+  - Links directly to Reddit for full reading of the "thriving" posts that are similar to the ADHD challange you are facing.
 - **Command-Line Interface (CLI)**:
   - Query ADHD stories directly from the terminal.
 - **Efficient Data Scraper**:
-  - Collects up to 1,000 Reddit posts.
+  - Collects up to 10,000 Reddit posts.
   - Analyzes sentiment and filters for thriving stories.
 - **Dynamic Embedding and Recommendation**:
   - Uses Sentence Transformers for semantic matching.
