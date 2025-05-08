@@ -1,89 +1,85 @@
+ADHD Stories Recommender
+Welcome to the ADHD Stories Recommender, an advanced natural language processing (NLP) project designed to provide users with the most inspiring "thriving" stories from ADHD and mental health communities on Reddit.
 
-# 🌟 ADHD Stories Recommender
+🚀 Project Features
+Multi-Subreddit Scraping: Collects thriving stories from r/ADHD, r/Anxiety, r/Depression, r/GetMotivated, and more.
 
-A machine learning-powered application that helps users discover "thriving" ADHD stories from Reddit. This project leverages NLP and sentiment analysis to identify positive and inspiring stories, making them easily accessible to users who may benefit from them.
+Sentiment Analysis: Filters out positive stories using NLTK's VADER sentiment analysis.
 
-## 🚀 Project Overview
-This project is a comprehensive solution for discovering and recommending "thriving" ADHD stories from the r/ADHD subreddit. It features:
-- A **CLI Recommender**: Quickly find inspiring stories directly in your terminal.
-- A **Streamlit Web App**: Interactive and user-friendly for a broader audience.
-- An efficient **Data Scraper and Processor**: Collects Reddit posts, analyzes sentiment, and identifies thriving stories.
-- Embedding and Similarity Matching: Finds the most relevant stories using Sentence Transformers.
+Semantic Search (Cosine Similarity): Matches user queries to the most similar thriving stories using Sentence Transformers (SBERT).
 
-## ✨ Features
-- **Interactive Streamlit Web App**:
-  - Enter an ADHD challenge that you are facing and get top 2 most similar thriving (people with a similar situation who figured it out) stories.
-  - Links directly to Reddit for full reading of the "thriving" posts that are similar to the ADHD challange you are facing.
-- **Command-Line Interface (CLI)**:
-  - Query ADHD stories directly from the terminal.
-- **Efficient Data Scraper**:
-  - Collects up to 10,000 Reddit posts.
-  - Analyzes sentiment and filters for thriving stories.
-- **Dynamic Embedding and Recommendation**:
-  - Uses Sentence Transformers for semantic matching.
-  - Recommends stories based on similarity.
+Percentage Match Display: Shows how similar each recommended story is to the user’s challenge (color-coded).
 
-## 📁 Project Structure
-```
-📂 ADHD Stories Recommender Project
-├── adhd_recommendor.py       # CLI Recommender
-├── app.py                    # Streamlit Web App
-├── launch_adhd_recommender.py # Unified Launcher (CLI + Streamlit + Scraping)
-├── thriving_adhd_posts.csv   # Scraped and filtered data (CSV)
-├── thriving_adhd_posts_with_embeddings.pkl # Data with embeddings (Pickle)
-├── thriving_adhd_embeddings.npy # Embeddings (Numpy)
-└── README.md                 # Project Documentation
-```
+✅ Green for matches above 50%.
 
-## ⚡️ Installation
-### Prerequisites:
-- Python 3.8 or higher
-- pip (Python package installer)
+🔴 Red for matches below 50%.
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/your-username/adhd-stories-recommender.git
-cd adhd-stories-recommender
-```
+Two Access Modes:
 
-### 2. Install Dependencies
-```bash
+Streamlit Web App (Interactive, User-Friendly).
+
+Command-Line Interface (CLI) with color-coded recommendations.
+
+📌 How to Use
+Clone this Repository:
+
+bash
+Copy
+Edit
+git clone https://github.com/jalalfaraj/adhd_recommender_project.git
+cd adhd_recommender_project
+Install Dependencies:
+
+bash
+Copy
+Edit
 pip install -r requirements.txt
-```
+Launch the Project:
 
-### 3. Set Up Reddit API Credentials
-- Go to [Reddit API Developer Portal](https://www.reddit.com/prefs/apps).
-- Create an app and get your:
-  - `client_id`
-  - `client_secret`
-  - `user_agent`
-- Replace these values in both `app.py` and `adhd_recommendor.py`.
+Run the launcher:
 
-## 🚀 Usage
-### 1. Running the Unified Launcher
-```bash
+bash
+Copy
+Edit
 python launch_adhd_recommender.py
-```
-- Choose between CLI Recommender, Streamlit Web App, and Data Scraper.
+Choose your mode:
 
-### 2. Running the Streamlit Web App Directly
-```bash
-streamlit run app.py
-```
+Run CLI Recommender (Command-Line).
 
-### 3. Using the CLI Recommender
-```bash
-python adhd_recommendor.py "I need help focusing and staying productive."
-```
+Run Streamlit Web App.
 
-### 4. Scraping Fresh Data
-- Use the launcher or run the scraper manually.
+Scrape Fresh Data (Multi-Subreddit).
 
-## 🔧 Technical Details
-- **NLP**: SentenceTransformer (all-MiniLM-L6-v2), Sentiment Analysis (VADER).
-- **ML**: NearestNeighbors (Scikit-Learn).
-- **Web Scraping**: Reddit API with PRAW.
+🖥️ Streamlit Web App Features
+Enter your ADHD challenge to receive the most similar "thriving" stories.
 
-## 🌐 Contact
-For any questions or feedback, feel free to reach out to me by email:
-farajj7@gmail.com
+Percentage Match (Cosine Similarity) displayed for each recommended story.
+
+Top stories sorted by similarity (Top 3, 5, or 10).
+
+Color-coded percentage:
+
+✅ Green (Above 50% Match)
+
+🔴 Red (Below 50% Match)
+
+🚀 How It Works (Technical Overview)
+Data Collection: Scrapes multiple subreddits (up to 10,000 posts) using Reddit API (PRAW).
+
+Sentiment Filtering: Analyzes sentiment with NLTK VADER and keeps only positive stories.
+
+Semantic Search: Embeds stories using SBERT (all-MiniLM-L6-v2).
+
+Similarity Matching: Recommends stories using Cosine Similarity + Sentiment.
+
+Color-Coded Recommendations: Green (High Match), Red (Low Match).
+
+✅ Future Improvements
+Expand to more mental health subreddits.
+
+Allow users to customize subreddits and sentiment thresholds.
+
+Add user authentication for personalized recommendations.
+
+🌟 Created by Jalal Faraj
+For any inquiries, feel free to reach out via LinkedIn or GitHub.
