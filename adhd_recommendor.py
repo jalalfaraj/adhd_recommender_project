@@ -16,14 +16,19 @@ import nltk
 import time
 import colorama
 from colorama import Fore, Style
+import os
+from dotenv import load_dotenv
 
 nltk.download("vader_lexicon", quiet=True)
 
-# Initializing Reddit API (Replace with your credentials)
+# Load environment variables from .env file
+load_dotenv()
+
+# Securely initialize Reddit API using environment variables
 reddit = praw.Reddit(
-    client_id="UJoTpwzPJnh-kRvDGnFtoA",
-    client_secret="jn_m05OJLKIcJsk4VOgRhRTsAgSmdA",
-    user_agent="adhd research script by /u/adhd_scraper"
+    client_id=os.getenv("REDDIT_CLIENT_ID"),
+    client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+    user_agent=os.getenv("REDDIT_USER_AGENT")
 )
 
 # List of subreddits to scrape
@@ -62,24 +67,28 @@ def recommend_stories(query, num_recommendations=5):
 def collect_reddit_posts(limit=1000):
     all_posts = []
     for subreddit_name in subreddits:
-        subreddit = reddit.subreddit(subreddit_name)
-        count = 0
-        print(f"Scraping subreddit: {subreddit_name}")
+        try:
+            subreddit = reddit.subreddit(subreddit_name)
+            count = 0
+            print(f"Scraping subreddit: {subreddit_name}")
 
-        for post in subreddit.new(limit=None):  # Using `.new` for most recent posts
-            all_posts.append({
-                'subreddit': subreddit_name,
-                'title': post.title,
-                'selftext': post.selftext or '',
-                'score': post.score,
-                'created_utc': post.created_utc,
-                'num_comments': post.num_comments,
-                'url': f"https://www.reddit.com{post.permalink}"
-            })
-            count += 1
-            if count >= (limit // len(subreddits)):  # Split limit across subreddits
-                break
-            time.sleep(0.1)  # Small delay to avoid rate limiting
+            for post in subreddit.new(limit=None):
+                all_posts.append({
+                    'subreddit': subreddit_name,
+                    'title': post.title,
+                    'selftext': post.selftext or '',
+                    'score': post.score,
+                    'created_utc': post.created_utc,
+                    'num_comments': post.num_comments,
+                    'url': f"https://www.reddit.com{post.permalink}"
+                })
+                count += 1
+                if count >= (limit // len(subreddits)):
+                    break
+                time.sleep(0.1)
+        
+        except Exception as e:
+            print(f"❌ Could not access subreddit: {subreddit_name}. Error: {str(e)}")
 
     df = pd.DataFrame(all_posts)
     print(f"✅ Collected {len(df)} Reddit posts across multiple subreddits")
