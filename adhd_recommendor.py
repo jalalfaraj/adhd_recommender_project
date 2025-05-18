@@ -1,4 +1,11 @@
-# adhd_recommendor.py - Enhanced CLI with Color-Coded Percentage Match
+#!/usr/bin/env python3
+"""
+adhd_recommendor.py
+
+Usage:
+    python adhd_recommendor.py "I need help focusing and staying productive."
+"""
+
 import praw
 import pandas as pd
 import numpy as np
@@ -22,7 +29,7 @@ reddit = praw.Reddit(
 # List of subreddits to scrape
 subreddits = [
     "ADHD", "Anxiety", "Depression", "GetMotivated",
-    "DecidingToBeBetter", "selfimprovement", "ADHD_Parents", "MentalHealth"
+    "DecidingToBeBetter", "selfimprovement", "MentalHealth"
 ]
 
 def recommend_stories(query, num_recommendations=5):
@@ -52,7 +59,7 @@ def recommend_stories(query, num_recommendations=5):
         print(f"Read full post: {row['url']}\n")
         print("---")
         
-def collect_reddit_posts(limit=10000):
+def collect_reddit_posts(limit=1000):
     all_posts = []
     for subreddit_name in subreddits:
         subreddit = reddit.subreddit(subreddit_name)
@@ -97,6 +104,6 @@ def process_and_filter(df):
     print(f"✅ Processed and saved {len(positive_df)} positive thriving posts")
     return positive_df
 
-# Collecting posts (up to 10,000 across all subreddits)
-df = collect_reddit_posts(10000)
+# Collecting posts (up to 1,000 across all subreddits)
+df = collect_reddit_posts(1000)
 positive_df = process_and_filter(df)
