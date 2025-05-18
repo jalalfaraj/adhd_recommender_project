@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+"""
+launch_adhd_recommender.py
+
+A single-click launcher to run either:
+1. The CLI recommender (adhd_recommendor.py).
+2. The full Streamlit Web App (app.py).
+3. Scrape fresh data directly from Reddit (1000 posts).
+"""
+
 # launch_adhd_recommender.py - Unified Launcher (CLI + Streamlit + Scraping)
 import os
 import subprocess
@@ -25,8 +35,8 @@ def main():
         print("\nStarting Fresh Data Scraping...")
         from adhd_recommendor import collect_reddit_posts, process_and_filter
         
-        limit = input("Enter the number of posts to scrape (recommended: 10000): ").strip()
-        limit = int(limit) if limit.isdigit() else 10000
+        limit = input("Enter the number of posts to scrape (recommended: 1000): ").strip()
+        limit = int(limit) if limit.isdigit() else 1000
         df = collect_reddit_posts(limit)
         process_and_filter(df)
         print("\n✅ Fresh data scraped and processed. Ready to use.")
