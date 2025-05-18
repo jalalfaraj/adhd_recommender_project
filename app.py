@@ -1,109 +1,66 @@
-#!/usr/bin/env python3
-"""
-adhd_recommendor.py
-
-Usage:
-    python adhd_recommendor.py "I need help focusing and staying productive."
-"""
-
-import praw
+# app.py - Streamlit Recommender with Enhanced Similarity and Sentiment Filtering
+import streamlit as st
 import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import nltk
-import time
-import colorama
-from colorama import Fore, Style
 
+# Downloading VADER for sentiment analysis
 nltk.download("vader_lexicon", quiet=True)
 
-# Initializing Reddit API (Replace with your credentials)
-reddit = praw.Reddit(
-    client_id="UJoTpwzPJnh-kRvDGnFtoA",
-    client_secret="jn_m05OJLKIcJsk4VOgRhRTsAgSmdA",
-    user_agent="adhd research script by /u/adhd_scraper"
-)
+# Displaying Subreddits Being Used
+st.title("Thriving ADHD Stories Recommender")
+st.markdown("#### Currently Scraping and Analyzing Stories From:")
+st.markdown("- r/ADHD\n- r/Anxiety\n- r/Depression\n- r/GetMotivated")
+st.markdown("- r/DecidingToBeBetter\n- r/selfimprovement\n- r/ADHD_Parents\n- r/MentalHealth")
 
-# List of subreddits to scrape
-subreddits = [
-    "ADHD", "Anxiety", "Depression", "GetMotivated",
-    "DecidingToBeBetter", "selfimprovement", "MentalHealth"
-]
-
-def recommend_stories(query, num_recommendations=5):
+# Load data and embeddings
+@st.cache(allow_output_mutation=True)
+def load_data():
     df = pd.read_pickle("thriving_adhd_posts_with_embeddings.pkl")
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    
-    # Encode user query
-    query_embedding = model.encode([query], convert_to_numpy=True).astype("float32")
     embeddings = np.vstack(df['embedding'].values).astype("float32")
-    
-    # Calculate cosine similarity
-    cosine_similarities = cosine_similarity(query_embedding.reshape(1, -1), embeddings).flatten()
-    
-    # Convert to percentages (0.1% precision)
-    df["similarity"] = cosine_similarities
-    df["similarity_percent"] = (df["similarity"] * 100).round(1)
-    
-    # Sorting by similarity
-    df_sorted = df.sort_values(by=["similarity_percent"], ascending=False)
-    top_posts = df_sorted.head(num_recommendations)
+    return df, embeddings
 
-    print("\nTop Recommendations:\n")
-    for index, row in top_posts.iterrows():
-        color = Fore.GREEN if row['similarity_percent'] > 50 else Fore.RED
-        print(f"{color}{row['title']} - {row['similarity_percent']}% Match{Style.RESET_ALL}")
-        print(row["selftext"][:300] + "...\n")
-        print(f"Read full post: {row['url']}\n")
-        print("---")
+df, embeddings = load_data()
+
+# Loading the SBERT Model
+@st.cache(allow_output_mutation=True)
+def load_model():
+    return SentenceTransformer("all-MiniLM-L6-v2")
+
+model = load_model()
+
+# User Input
+st.write("Enter your ADHD challenge below to receive similar thriving stories.")
+user_input = st.text_area("Your ADHD Challenge", height=100)
+num_recommendations = st.selectbox("Select number of stories:", [3, 5, 10], index=1)
+
+if st.button("Find Stories"):
+    if not user_input.strip():
+        st.warning("Please enter a sentence or two about your challenge.")
+    else:
+        # Encode user input
+        query_embedding = model.encode([user_input], convert_to_numpy=True).astype("float32")
         
-def collect_reddit_posts(limit=1000):
-    all_posts = []
-    for subreddit_name in subreddits:
-        subreddit = reddit.subreddit(subreddit_name)
-        count = 0
-        print(f"Scraping subreddit: {subreddit_name}")
+        # Calculate cosine similarity
+        query_embedding = query_embedding.reshape(1, -1)
+        cosine_similarities = cosine_similarity(query_embedding, embeddings).flatten()
+        
+        # Convert cosine similarities to percentages rounded to the nearest tenth (0.1%)
+        df["similarity"] = cosine_similarities
+        df["similarity_percent"] = (df["similarity"] * 100).round(1)
+        
+        # Sort posts by cosine similarity (descending)
+        df_sorted = df.sort_values(by=["similarity_percent", "sentiment"], ascending=[False, False])
+        top_posts = df_sorted.head(num_recommendations)
 
-        for post in subreddit.new(limit=None):  # Using `.new` for most recent posts
-            all_posts.append({
-                'subreddit': subreddit_name,
-                'title': post.title,
-                'selftext': post.selftext or '',
-                'score': post.score,
-                'created_utc': post.created_utc,
-                'num_comments': post.num_comments,
-                'url': f"https://www.reddit.com{post.permalink}"
-            })
-            count += 1
-            if count >= (limit // len(subreddits)):  # Split limit across subreddits
-                break
-            time.sleep(0.1)  # Small delay to avoid rate limiting
-
-    df = pd.DataFrame(all_posts)
-    print(f"✅ Collected {len(df)} Reddit posts across multiple subreddits")
-    df.to_csv("thriving_adhd_posts.csv", index=False)
-    return df
-
-def process_and_filter(df):
-    sia = SentimentIntensityAnalyzer()
-    df["sentiment"] = df["selftext"].apply(lambda t: sia.polarity_scores(t)['compound'])
-
-    # Filtering only positive posts (sentiment > 0.2)
-    positive_df = df[df['sentiment'] > 0.2].copy()
-    
-    # Embedding the posts using SBERT
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    corpus = (positive_df['title'].fillna('') + ' ' + positive_df['selftext'].fillna('')).tolist()
-    embeddings = model.encode(corpus, show_progress_bar=True)
-    positive_df['embedding'] = embeddings.tolist()
-
-    # Saving the positive posts with embeddings
-    positive_df.to_pickle("thriving_adhd_posts_with_embeddings.pkl")
-    print(f"✅ Processed and saved {len(positive_df)} positive thriving posts")
-    return positive_df
-
-# Collecting posts (up to 1,000 across all subreddits)
-df = collect_reddit_posts(1000)
-positive_df = process_and_filter(df)
+        st.write(f"### Top {num_recommendations} Most Similar Thriving Stories:")
+        for index, row in top_posts.iterrows():
+            # Determine color (Green if >50%, Red if <=50%)
+            color = "green" if row['similarity_percent'] > 50 else "red"
+            st.markdown(f"#### <span style='color:{color};'>{row['title']} - {row['similarity_percent']}% Match</span>", unsafe_allow_html=True)
+            st.write(row["selftext"][:300] + "...")
+            st.markdown(f"[Read full post]({row['url']})")
+            st.markdown("---")
